@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Wwe</string>
+    <string name="start">Start WWE Service</string>
 </resources>
