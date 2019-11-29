@@ -3,7 +3,6 @@ package com.stone.wwe.engine;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -39,7 +38,8 @@ public class SnowboyWakeWordEngine extends WakeWordEngine implements Runnable {
     }
 
     private void initAudioRecord(){
-        mAudioBuffer = new byte[16000*2*1];
+        int buffersize = (int) (16000 * 2 * 0.1);
+        mAudioBuffer = new byte[buffersize];
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, 16000,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, mAudioBuffer.length);
 
@@ -65,23 +65,18 @@ public class SnowboyWakeWordEngine extends WakeWordEngine implements Runnable {
 
             int detectResult = mSnowboyDetect.RunDetection(data, data.length);
 
-            if (mWweCallback == null){
-                Log.v(TAG, "detect result:" + detectResult);
-                continue;
-            }
-
             switch (detectResult){
                 case -2:
-                    mWweCallback.onNoSpeech();
+                    this.onNoSpeech();
                     break;
                 case -1:
-                    mWweCallback.onDetectError();
+                    this.onDetectError();
                     break;
                 case 0:
-                    mWweCallback.onSpeeching();
+                    this.onSpeeching();
                     break;
                 default:
-                    mWweCallback.onKeyWordDetect(detectResult);
+                    this.onKeyWordDetect(detectResult);
                     break;
             }
         }

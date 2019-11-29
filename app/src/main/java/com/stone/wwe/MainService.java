@@ -52,6 +52,8 @@ public class MainService extends Service implements IWweCallback {
         mWakeWordEngine = new SnowboyWakeWordEngine(COMMON_RES, ALEXA_UMDL);
         // add callback
         mWakeWordEngine.setCallback(this);
+        // set key word detected notify sound (optional)
+        mWakeWordEngine.setNotifySoundResource(BASE_DIR + File.separator + "ding.wav");
     }
 
     @Override
