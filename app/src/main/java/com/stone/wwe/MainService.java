@@ -9,13 +9,14 @@ import android.util.Log;
 
 import com.stone.wwe.engine.SnowboyWakeWordEngine;
 import com.stone.wwe.engine.WakeWordEngine;
+import com.stone.wwe.engine.interf.IWweCallback;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MainService extends Service {
+public class MainService extends Service implements IWweCallback {
 
     private static final String TAG = MainService.class.getName();
 
@@ -23,9 +24,6 @@ public class MainService extends Service {
     public static final String SP_KEY_INIT_DATA = "need_init_data";
 
     private String BASE_DIR;
-    private String ALEXA_UMDL;
-    private String COMMON_RES;
-
 
     private WakeWordEngine mWakeWordEngine;
 
@@ -42,15 +40,18 @@ public class MainService extends Service {
 
         // get common resource and alexa model
         BASE_DIR = getDataDir().getAbsolutePath() + File.separator + "files/snowboy";
-        ALEXA_UMDL = BASE_DIR + File.separator + "alexa.umdl";
-        COMMON_RES = BASE_DIR + File.separator + "common.res";
+        String ALEXA_UMDL = BASE_DIR + File.separator + "alexa.umdl";
+        String COMMON_RES = BASE_DIR + File.separator + "common.res";
 
         // init data
         if (needInitData()){
             initData();
         }
 
+        // create Snowboy WWE
         mWakeWordEngine = new SnowboyWakeWordEngine(COMMON_RES, ALEXA_UMDL);
+        // add callback
+        mWakeWordEngine.setCallback(this);
     }
 
     @Override
@@ -138,4 +139,27 @@ public class MainService extends Service {
     }
 
 
+    @Override
+    public void onKeyWordDetect(int count) {
+        // attention: this method call in work thread, so not operate UI directly.
+        Log.v(TAG, "key word detect.....:" + count);
+    }
+
+    @Override
+    public void onDetectError() {
+        // attention: this method call in work thread, so not operate UI directly.
+        Log.v(TAG, "key word detect error.....");
+    }
+
+    @Override
+    public void onNoSpeech() {
+        // attention: this method call in work thread, so not operate UI directly.
+        Log.v(TAG, "no speech.....");
+    }
+
+    @Override
+    public void onSpeeching() {
+        // attention: this method call in work thread, so not operate UI directly.
+        Log.v(TAG, "speeching but not detect keyword....");
+    }
 }

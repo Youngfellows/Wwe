@@ -10,6 +10,9 @@ import java.nio.ByteOrder;
 
 import ai.kitt.snowboy.SnowboyDetect;
 
+/**
+ * Use Snowboy library
+ */
 public class SnowboyWakeWordEngine extends WakeWordEngine implements Runnable {
     private static final String TAG = SnowboyWakeWordEngine.class.getName();
 
@@ -19,6 +22,7 @@ public class SnowboyWakeWordEngine extends WakeWordEngine implements Runnable {
     private boolean isDetecting = false;
 
     public SnowboyWakeWordEngine(String resource, String model){
+        super();
         mSnowboyDetect = new SnowboyDetect(resource, model);
 
         initAudioRecord();
@@ -53,13 +57,33 @@ public class SnowboyWakeWordEngine extends WakeWordEngine implements Runnable {
     public void run() {
         isDetecting = true;
         mAudioRecord.startRecording();
+
         while (isDetecting){
             mAudioRecord.read(mAudioBuffer, 0, mAudioBuffer.length);
             short[] data = new short[mAudioBuffer.length / 2];
             ByteBuffer.wrap(mAudioBuffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(data);
-            int detectResult = mSnowboyDetect.RunDetection(data, data.length);
-            Log.v(TAG, "detect result:" + detectResult);
 
+            int detectResult = mSnowboyDetect.RunDetection(data, data.length);
+
+            if (mWweCallback == null){
+                Log.v(TAG, "detect result:" + detectResult);
+                continue;
+            }
+
+            switch (detectResult){
+                case -2:
+                    mWweCallback.onNoSpeech();
+                    break;
+                case -1:
+                    mWweCallback.onDetectError();
+                    break;
+                case 0:
+                    mWweCallback.onSpeeching();
+                    break;
+                default:
+                    mWweCallback.onKeyWordDetect(detectResult);
+                    break;
+            }
         }
         mAudioRecord.stop();
     }
