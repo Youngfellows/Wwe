@@ -1,4 +1,6 @@
 package com.stone.wwe.engine;
 
-public abstract class WakeWordEngine {
+import com.stone.wwe.engine.interf.IEngine;
+
+public abstract class WakeWordEngine implements IEngine {
 }
